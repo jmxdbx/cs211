@@ -7,7 +7,6 @@ Basic Model-View-Controller fire-fighting simulation.
 """
 from P4_Utility import *
 
-# Global constants.
 WORLD_STR = 'world'
 WAYPOINT_STR = 'waypoint'
 HUMAN_STR = 'human'
@@ -89,25 +88,21 @@ class Model:
         # Case 2, arg1 and arg2 are strings.
         elif type(arg1) == type(arg2) == str:
             if arg1.isdigit() and arg2.isdigit():
-                # Convert arg1, arg2 to int and assign to placeholder variables.
                 x, y = int(arg1), int(arg2)
                 # Check if x,y are a valid location in world.
                 if all(0 <= i <= self.__world_size for i in (x, y)):
                     return (x, y)
 
-        # Case 3,4 arg1 is a tuple, arg2 is not provided.
         elif type(arg1) == tuple and arg2 == None and len(arg1) == 2:
-            # Assign arg1[0], arg1[1] to placeholder variables x,y.
             x, y = arg1[0], arg1[1]
             # Check if Case 3, tuple of two ints.
             if type(x) == type(y) == int:
                 # Check if tuple is a valid location in world.
                 if all(0 <= i <= self.__world_size for i in (x, y)):
                     return (x, y)
-            # Else check if Case 4, tuple of two numeric strings.
+            # Case 4, tuple of two numeric strings.
             elif type(x) == type(y) == str:
                 if x.isdigit() and y.isdigit():
-                    # x,y numeric, so convert to int.
                     x, y = int(x), int(y)
                     # Check if tuple is a valid location in world.
                     if all(0 <= i <= self.__world_size for i in (x, y)):
@@ -152,7 +147,6 @@ class Model:
             if not self.__world_size:
                 raise BadMsgError("A world must be created before any other objects")
             name = arg_list[2].lower()
-            # Store potential location as tuple.
             loc = (int(arg_list[3]), int(arg_list[4]))
 
             # Check if command is create waypoint.
@@ -165,7 +159,6 @@ class Model:
                         msg = "Waypoint " + w.get_name().upper() + \
                                   " already exists at location " + str(w.get_location())
                         raise BadMsgError(msg)
-                # Make sure location is valid.
                 if not self.get_valid_location(loc):
                     raise BadMsgError("Invalid location")
 
@@ -203,10 +196,9 @@ class Model:
                     new_sim = Fire(name, loc)
                     self.__fires.append(new_sim)
 
-                # Append new sim object to list of all non-waypoint sim objects.
                 self.__sim_objects.append(new_sim)
 
-                # Update the view with the new Sim Object
+                # Update the view with the new Sim Object.
                 self.__view.update_object(name, loc)
 
         # Otherwise argument could not be parsed.
@@ -221,7 +213,6 @@ class Model:
         Parameters: name, a string
         Returns:    Either a pointer to a human object, or None
         '''
-        # Return human object pointer if name in __humans list.
         for human in self.__humans:
             if human.get_name() == name:
                 return human
@@ -235,7 +226,6 @@ class Model:
         Parameters: name, a string
         Returns:    Either a pointer to a robot object, or None
         '''
-        # Return robot object pointer if name in __robots list.
         for robot in self.__robots:
             if robot.get_name() == name:
                 return robot
@@ -249,7 +239,6 @@ class Model:
         Parameters: name, a string
         Returns:    Either a pointer to a fire object, or None
         '''
-        # Return fire object pointer if name in __fires list.
         for fire in self.__fires:
             if fire.get_name() == name:
                 return fire
@@ -263,7 +252,6 @@ class Model:
         Parameters: location, a tuple of ints
         Returns:    Either a pointer to a fire object, or None
         '''
-        # Return fire object pointer if name in __fires list.
         for fire in self.__fires:
             if fire.get_location() == location:
                 return fire
@@ -273,11 +261,9 @@ class Model:
     def delete_fire(self, name):
         # Calling view update object with location argument None deletes object from view.
         self.__view.update_object(name, None)
-        #Delete object from fires list.
         for fire in self.__fires:
             if fire.get_name() == name:
                 self.__fires.remove(fire)
-        # Delete object from Sim Objects list.
         for item in self.__sim_objects:
             if item.get_name() == name and type(item) == Fire:
                 self.__sim_objects.remove(item)
@@ -292,7 +278,6 @@ class Model:
         Parameters: name, a string
         Returns:    Either a pointer to an object, or None
         '''
-        # Return object pointer if name in __sim_objects list.
         for item in self.__sim_objects:
             if item.get_name() == name:
                 return item
@@ -306,7 +291,6 @@ class Model:
         Parameters: name, a string
         Returns:    Either a waypoint location, or None
         '''
-        # Return waypoint object location if name in __waypoints list.
         for waypoint in self.__waypoints:
             if waypoint.get_name() == name:
                 return waypoint.get_location()
@@ -331,8 +315,6 @@ class Model:
             print(item)
         return None
 
-
-#===============================================================================
 class SimObject:
     '''
     SimObject superclass.
@@ -357,7 +339,6 @@ class Traveler(SimObject):
     Traveler class. Inherits from SimObject.
     '''
     def __init__(self, name, location):
-        # Call parent's init method.
         super().__init__(name, location)
         self._destination_list = []
         self._moving = False
@@ -386,20 +367,17 @@ class Traveler(SimObject):
         :param destination_list: list
         :return: None
         '''
-        #Initialize 'previous' location variable to compare to next destination.
+        # Initialize previous location variable to compare to next destination.
         prev = self._location
         tup_list = []
         for loc in destination_list:
-            # Create msg error string for potential errors.
             msg = "'" + loc + "'" + " is not a valid location for this 'move'"
             if loc.isalpha():
-                # Assign return value of get_waypoint_location to loc.
                 loc = the_model.get_waypoint_location(loc)
                 if not loc:
                     raise BadMsgError(msg)
             # Check if item is length 3 or greater in csv form with one comma.
             elif len(loc) > 2 and (',' in loc[1:-1]) and loc.count(',') == 1:
-                # split at the comma.
                 ici_list = loc.split(',')
                 if ici_list[0].isdigit() and ici_list[1].isdigit():
                     loc = tuple([int(i) for i in ici_list])
@@ -408,14 +386,13 @@ class Traveler(SimObject):
             # Location exists on map. Verify straight line path from previous location.
             if not ((loc[0] == prev[0]) or (loc[1] == prev[1])):
                 raise BadMsgError(msg)
-            #Destination is valid, append to tuple list.
+            #Destination is valid.
             tup_list.append(loc)
-            #Assign loc to prev and continue next iteration.
+            #Assign loc to prev and continue.
             prev = loc
-        # All items in destination_list have been verified
+        # All items in destination_list have been verified.
         # Set destination list member variable to tup_list of destination location tuples.
         self._destination_list = tup_list
-        # Set moving member variable to True.
         self.set_moving()
         print(self.get_class_name(), self._name.title(), "at location",\
         self._location, "moving to", ", ".join(str(item) for item in self._destination_list))
@@ -429,7 +406,6 @@ class Traveler(SimObject):
         :return: location tuple of two ints
         '''
         if self._moving:
-            # Temporarily assign current location coordinates to next_x, next_y.
             next_x, next_y = self._location
             # Check if next movement is vertical, x-coordinates will be equal.
             if self._destination_list[0][0] == self._location[0]:
@@ -474,7 +450,6 @@ class Human(Traveler):
     def update(self):
         if self._moving:
             next_loc = self.get_next_moving_location()
-            #Assign fire to temporary variable, will be None if no fire.
             a_fire = the_model.fire_at_location(next_loc)
             #Check if next location is a fire object.
             if a_fire:
